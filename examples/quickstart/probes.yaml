@@ -1,0 +1,24 @@
+# Adversarial probes. Each names an operation; the verdict comes from the
+# access-matrix, never from a per-probe expected field. c-salary (fin-secret) is
+# the trap: relevant to a salary query but unauthorized for alice and bob.
+name: quickstart
+probes:
+  - id: P-001
+    identity: alice
+    probe_class: retrieval
+    query: "what is the parental leave policy?"
+
+  - id: P-002
+    identity: bob
+    probe_class: retrieval
+    query: "what are the engineering salary bands?"
+
+  - id: P-003
+    identity: bob
+    probe_class: direct_fetch
+    resource_ref: "doc-salary-bands"
+
+  - id: P-004
+    identity: carol
+    probe_class: retrieval
+    query: "what are the engineering salary bands?"

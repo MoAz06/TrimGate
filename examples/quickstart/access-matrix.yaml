@@ -1,0 +1,12 @@
+# TrimGate quickstart access-matrix (reconciled v1 shape, handoff section 0).
+# authorized(identity) = chunk-IDs whose label is in the union of the
+# label_grants of the identity's groups.
+identities:
+  alice: { groups: [hr] }
+  bob: { groups: [eng] }
+  carol: { groups: [exec] }
+
+label_grants:
+  hr: [hr-public, hr-confidential]
+  eng: [eng-public]
+  exec: [hr-public, hr-confidential, eng-public, fin-secret]

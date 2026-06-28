@@ -1,0 +1,4 @@
+{"chunk_id": "c-handbook", "label": "hr-public", "text": "The employee handbook covers general company policy."}
+{"chunk_id": "c-parental", "label": "hr-confidential", "text": "Parental leave in the EU is 26 weeks at full pay."}
+{"chunk_id": "c-readme", "label": "eng-public", "text": "To run the service locally, execute make dev."}
+{"chunk_id": "c-salary", "label": "fin-secret", "text": "Engineering L5 base salary band: 95k-130k EUR."}

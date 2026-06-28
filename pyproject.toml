@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trimgate"
+version = "0.0.1"
+description = "Deterministic, test-time auditor that proves an enterprise RAG pipeline never surfaces a chunk to an unauthorized identity."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{ name = "Mohamed Azahrioui" }]
+keywords = ["rag", "access-control", "security-trimming", "pytest", "ci", "auditor"]
+dependencies = [
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.scripts]
+trimgate = "trimgate.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trimgate"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
