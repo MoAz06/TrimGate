@@ -9,6 +9,7 @@ description = "Deterministic, test-time auditor that proves an enterprise RAG pi
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "LICENSES/CC-BY-4.0.txt"]
 authors = [{ name = "Mohamed Azahrioui" }]
 keywords = ["rag", "access-control", "security-trimming", "pytest", "ci", "auditor"]
 dependencies = [
@@ -18,10 +19,16 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "types-PyYAML",
 ]
 
 [project.scripts]
 trimgate = "trimgate.cli:main"
+
+[project.entry-points.pytest11]
+trimgate = "trimgate.plugin"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/trimgate"]
@@ -29,3 +36,15 @@ packages = ["src/trimgate"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/trimgate"]

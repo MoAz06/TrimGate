@@ -4,13 +4,13 @@ Same matrix + corpus + probeset + adapter responses -> identical verdicts, in th
 same order, every time. This is what makes the verdict trustworthy as a CI gate.
 """
 
+import pathlib
+
 from trimgate.corpus import load_corpus
 from trimgate.demo import leaky_adapter
 from trimgate.matrix import load_matrix
 from trimgate.probe import load_probeset
 from trimgate.runner import run
-
-import pathlib
 
 QS = pathlib.Path(__file__).resolve().parents[1] / "examples" / "quickstart"
 

@@ -37,7 +37,9 @@ def test_retrieval_probe_leak_is_detected():
 
 
 def test_clean_retrieval_passes():
-    matrix = AccessMatrix(identities={"alice": ["finance"]}, label_grants={"finance": ["fin-public"]})
+    matrix = AccessMatrix(
+        identities={"alice": ["finance"]}, label_grants={"finance": ["fin-public"]}
+    )
     corpus = Corpus(chunks=(Chunk("c1", "fin-public"), Chunk("c2", "fin-public")))
     adapter = FakeAdapter(retrievals={("alice", "policy"): ["c1", "c2"]})
     probe = Probe("P-ok", "alice", ProbeClass.RETRIEVAL, query="policy")
@@ -61,7 +63,9 @@ def test_direct_fetch_probe_uses_fetch_resource_and_flags_leak():
 
 
 def test_enumeration_probe_uses_list_resources_and_passes_when_authorized():
-    matrix = AccessMatrix(identities={"alice": ["finance"]}, label_grants={"finance": ["fin-public"]})
+    matrix = AccessMatrix(
+        identities={"alice": ["finance"]}, label_grants={"finance": ["fin-public"]}
+    )
     corpus = Corpus(chunks=(Chunk("c1", "fin-public"),))
     adapter = FakeAdapter(listings={"alice": ["c1"]})
     probe = Probe("P-3", "alice", ProbeClass.ENUMERATION)

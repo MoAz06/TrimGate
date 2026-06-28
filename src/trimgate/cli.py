@@ -10,9 +10,9 @@ error (config/adapter), matching the handoff's contract.
 from __future__ import annotations
 
 import argparse
-import importlib
 from collections.abc import Sequence
 
+from trimgate.adapter import resolve_adapter
 from trimgate.corpus import load_corpus
 from trimgate.diff import trim_gap
 from trimgate.engine import Outcome
@@ -27,15 +27,6 @@ _MARK = {
     Outcome.ERROR: "[ERR ]",
     Outcome.SKIPPED: "[SKIP]",
 }
-
-
-def _resolve_adapter(spec: str) -> object:
-    module_name, sep, attr = spec.partition(":")
-    if not sep or not attr:
-        raise SystemExit(f"--adapter must be MODULE:ATTR, got {spec!r}")
-    module = importlib.import_module(module_name)
-    obj = getattr(module, attr)
-    return obj() if callable(obj) else obj
 
 
 def _print_summary(result: RunResult) -> None:
@@ -63,7 +54,7 @@ def _execute(args: argparse.Namespace) -> RunResult:
     matrix = load_matrix(args.matrix)
     corpus = load_corpus(args.corpus)
     probeset = load_probeset(args.probes)
-    adapter = _resolve_adapter(args.adapter)
+    adapter = resolve_adapter(args.adapter)
     return run(probeset, adapter, matrix, corpus)
 
 
@@ -106,7 +97,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     run_parser = sub.add_parser("run", help="run a probeset against an adapter")
     _add_common_args(run_parser)
-    run_parser.add_argument("--fail-on-leak", action="store_true", help="exit non-zero on leak")
     run_parser.add_argument("--out", help="write the canonical JSON receipt to this path")
     run_parser.add_argument("--report-md", help="write a human-readable Markdown report")
     run_parser.set_defaults(func=_cmd_run)

@@ -5,8 +5,15 @@ def _seed() -> ProbeSet:
     return ProbeSet(
         name="seed",
         probes=(
-            Probe(id="P-001", identity="alice", probe_class=ProbeClass.RETRIEVAL, query="financials"),
-            Probe(id="P-002", identity="bob", probe_class=ProbeClass.DIRECT_FETCH, resource_ref="doc-x"),
+            Probe(
+                id="P-001", identity="alice", probe_class=ProbeClass.RETRIEVAL, query="financials"
+            ),
+            Probe(
+                id="P-002",
+                identity="bob",
+                probe_class=ProbeClass.DIRECT_FETCH,
+                resource_ref="doc-x",
+            ),
         ),
     )
 

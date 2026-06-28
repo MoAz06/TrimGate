@@ -13,7 +13,9 @@ AdapterError, which TrimGate records fail-closed.
 
 from __future__ import annotations
 
-from typing import Protocol, Sequence, runtime_checkable
+import importlib
+from collections.abc import Sequence
+from typing import Protocol, cast, runtime_checkable
 
 Identity = str  # access-matrix key
 
@@ -31,3 +33,16 @@ class RagAdapter(Protocol):
 
 class AdapterError(Exception):
     """Genuine backend failure (timeout, auth error). Recorded fail-closed."""
+
+
+def resolve_adapter(spec: str) -> RagAdapter:
+    """Resolve a MODULE:ATTR import path to an adapter instance.
+
+    ATTR may be a class (instantiated no-args) or a factory (called); an already
+    constructed instance is used as-is.
+    """
+    module_name, sep, attr = spec.partition(":")
+    if not sep or not attr:
+        raise ValueError(f"adapter must be MODULE:ATTR, got {spec!r}")
+    obj = getattr(importlib.import_module(module_name), attr)
+    return cast("RagAdapter", obj() if callable(obj) else obj)

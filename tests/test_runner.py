@@ -24,7 +24,7 @@ def test_run_collects_verdicts_in_probe_order_and_flags_failure():
     matrix, corpus = _setup()
     adapter = FakeAdapter(
         retrievals={
-            ("alice", "policy"): ["c-fin"],          # clean
+            ("alice", "policy"): ["c-fin"],  # clean
             ("bob", "secrets"): ["c-eng", "c-secret"],  # leaks c-secret
         }
     )

@@ -11,12 +11,13 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
+from typing import Any
 
 import yaml
 
 
-class ProbeClass(str, Enum):
+class ProbeClass(StrEnum):
     RETRIEVAL = "retrieval"
     DIRECT_FETCH = "direct_fetch"
     ENUMERATION = "enumeration"
@@ -51,11 +52,8 @@ class ProbeSet:
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def load_probeset(path: str) -> ProbeSet:
-    with open(path, encoding="utf-8") as fh:
-        data = yaml.safe_load(fh) or {}
-    name = data.get("name", "probeset")
-    probes = tuple(
+def build_probes(entries: list[dict[str, Any]]) -> tuple[Probe, ...]:
+    return tuple(
         Probe(
             id=entry["id"],
             identity=entry["identity"],
@@ -63,6 +61,12 @@ def load_probeset(path: str) -> ProbeSet:
             query=entry.get("query"),
             resource_ref=entry.get("resource_ref"),
         )
-        for entry in (data.get("probes") or [])
+        for entry in entries
     )
-    return ProbeSet(name=name, probes=probes)
+
+
+def load_probeset(path: str) -> ProbeSet:
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh) or {}
+    name = data.get("name", "probeset")
+    return ProbeSet(name=name, probes=build_probes(data.get("probes") or []))

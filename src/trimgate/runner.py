@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from trimgate.adapter import RagAdapter
 from trimgate.corpus import Corpus
 from trimgate.engine import Outcome, Verdict, evaluate
 from trimgate.matrix import AccessMatrix
@@ -41,6 +42,6 @@ class RunResult:
         return counts
 
 
-def run(probeset: ProbeSet, adapter: object, matrix: AccessMatrix, corpus: Corpus) -> RunResult:
+def run(probeset: ProbeSet, adapter: RagAdapter, matrix: AccessMatrix, corpus: Corpus) -> RunResult:
     verdicts = tuple(evaluate(p, adapter, matrix, corpus) for p in probeset.probes)
     return RunResult(probeset_hash=probeset.stable_hash(), verdicts=verdicts)

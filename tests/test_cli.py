@@ -7,7 +7,7 @@ GOLDEN = pathlib.Path(__file__).resolve().parent / "golden"
 
 
 def _args(adapter: str, command: str = "run") -> list[str]:
-    args = [
+    return [
         command,
         "--adapter",
         adapter,
@@ -18,9 +18,6 @@ def _args(adapter: str, command: str = "run") -> list[str]:
         "--probes",
         str(QS / "probes.yaml"),
     ]
-    if command == "run":
-        args.append("--fail-on-leak")
-    return args
 
 
 def test_cli_run_passes_on_clean_adapter(capsys):
@@ -52,10 +49,7 @@ def test_cli_diff_is_empty_and_passes_on_clean_adapter(capsys):
 def test_cli_run_out_writes_canonical_receipt_and_markdown(tmp_path, capsys):
     out = tmp_path / "receipt.json"
     md = tmp_path / "receipt.md"
-    code = main(
-        _args("trimgate.demo:leaky_adapter")
-        + ["--out", str(out), "--report-md", str(md)]
-    )
+    code = main(_args("trimgate.demo:leaky_adapter") + ["--out", str(out), "--report-md", str(md)])
     assert code == 1
 
     golden = (GOLDEN / "receipt_leaky.json").read_text(encoding="utf-8").rstrip("\n")

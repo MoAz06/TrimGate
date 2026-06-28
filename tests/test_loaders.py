@@ -18,7 +18,9 @@ def test_load_matrix_from_yaml(tmp_path):
     matrix = load_matrix(str(path))
 
     assert matrix.allowed_labels("alice") == frozenset({"fin-public", "fin-restricted"})
-    assert matrix.allowed_labels("carol") == frozenset({"fin-public", "fin-restricted", "exec-only"})
+    assert matrix.allowed_labels("carol") == frozenset(
+        {"fin-public", "fin-restricted", "exec-only"}
+    )
 
 
 def test_load_corpus_from_jsonl(tmp_path):

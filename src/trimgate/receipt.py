@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from typing import Any
 
-from trimgate.engine import Outcome
 from trimgate.runner import RunResult
 
 SCHEMA = "trimgate/receipt@1"
@@ -27,7 +27,7 @@ def _sha256_file(path: str) -> str:
     return digest.hexdigest()
 
 
-def build_receipt(result: RunResult, *, matrix_path: str, corpus_path: str) -> dict:
+def build_receipt(result: RunResult, *, matrix_path: str, corpus_path: str) -> dict[str, Any]:
     results = [
         {
             "probe_id": v.probe_id,
@@ -57,11 +57,11 @@ def build_receipt(result: RunResult, *, matrix_path: str, corpus_path: str) -> d
     }
 
 
-def canonical_json(receipt: dict) -> str:
+def canonical_json(receipt: dict[str, Any]) -> str:
     return json.dumps(receipt, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
-def to_markdown(receipt: dict) -> str:
+def to_markdown(receipt: dict[str, Any]) -> str:
     summary = receipt["summary"]
     verdict = receipt["verdict"].upper()
     lines = [
