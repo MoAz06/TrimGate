@@ -1,6 +1,53 @@
-from trimgate.corpus import load_corpus
-from trimgate.matrix import load_matrix
+import pytest
+
+from trimgate.corpus import CorpusError, load_corpus
+from trimgate.matrix import MatrixError, load_matrix
 from trimgate.probe import ProbeClass, load_probeset
+
+
+def test_load_matrix_rejects_scalar_where_list_expected(tmp_path):
+    path = tmp_path / "m.yaml"
+    # `groups: finance` (scalar) instead of `[finance]` would shred into characters.
+    path.write_text(
+        "identities:\n  alice: {groups: finance}\nlabel_grants:\n  finance: [x]\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(MatrixError):
+        load_matrix(str(path))
+
+
+def test_load_matrix_rejects_dangling_group_reference(tmp_path):
+    path = tmp_path / "m.yaml"
+    path.write_text(
+        "identities:\n  alice: {groups: [ghost]}\nlabel_grants:\n  finance: [x]\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(MatrixError):
+        load_matrix(str(path))
+
+
+def test_load_corpus_rejects_row_missing_label(tmp_path):
+    path = tmp_path / "c.jsonl"
+    path.write_text('{"chunk_id": "c1"}\n', encoding="utf-8")
+    with pytest.raises(CorpusError):
+        load_corpus(str(path))
+
+
+def test_load_corpus_rejects_non_string_label(tmp_path):
+    path = tmp_path / "c.jsonl"
+    path.write_text('{"chunk_id": "c1", "label": null}\n', encoding="utf-8")
+    with pytest.raises(CorpusError):
+        load_corpus(str(path))
+
+
+def test_load_corpus_rejects_duplicate_json_keys(tmp_path):
+    path = tmp_path / "c.jsonl"
+    # last-key-wins would silently relabel a secret chunk as public.
+    path.write_text(
+        '{"chunk_id": "c1", "label": "fin-secret", "label": "hr-public"}\n', encoding="utf-8"
+    )
+    with pytest.raises(CorpusError):
+        load_corpus(str(path))
 
 
 def test_load_matrix_from_yaml(tmp_path):

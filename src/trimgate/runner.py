@@ -23,6 +23,10 @@ class RunResult:
 
     @property
     def passed(self) -> bool:
+        # A run that audited nothing is never a pass: zero probes, or every probe
+        # skipped (adapter lacked the method) -> no access path was actually checked.
+        if not self.verdicts or all(v.status is Outcome.SKIPPED for v in self.verdicts):
+            return False
         return not any(v.status in (Outcome.LEAK, Outcome.ERROR) for v in self.verdicts)
 
     @property
@@ -32,6 +36,10 @@ class RunResult:
     @property
     def total_errors(self) -> int:
         return sum(1 for v in self.verdicts if v.status is Outcome.ERROR)
+
+    @property
+    def total_skipped(self) -> int:
+        return sum(1 for v in self.verdicts if v.status is Outcome.SKIPPED)
 
     @property
     def per_identity_leaks(self) -> dict[str, int]:

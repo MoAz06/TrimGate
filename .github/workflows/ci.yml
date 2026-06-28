@@ -10,10 +10,11 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
@@ -29,4 +30,39 @@ jobs:
       - name: Type check
         run: mypy
       - name: Test
-        run: pytest -q
+        # Floor is conservative: the pytest11 plugin imports trimgate before
+        # coverage starts, so module-level lines read as missed. Executed-code
+        # coverage is far higher.
+        run: pytest --cov=trimgate --cov-branch --cov-fail-under=70 -q
+
+  azure-typecheck:
+    # The azure extra is type-checked and tested separately so a regression in
+    # the azure module cannot hide behind ignore_missing_imports.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev,azure]"
+      - run: mypy
+      - run: pytest -q
+
+  build:
+    # Verify the artifact users actually install: build the wheel, install it
+    # clean, and confirm the CLI runs and the py.typed marker shipped.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build --wheel
+      - name: Install from wheel and smoke-test
+        run: |
+          python -m venv /tmp/fresh
+          /tmp/fresh/bin/pip install dist/*.whl
+          /tmp/fresh/bin/trimgate --help
+          /tmp/fresh/bin/python -c "import importlib.resources as r; assert (r.files('trimgate') / 'py.typed').is_file(), 'py.typed missing from wheel'"

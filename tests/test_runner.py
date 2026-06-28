@@ -45,6 +45,55 @@ def test_run_collects_verdicts_in_probe_order_and_flags_failure():
     assert result.probeset_hash == probeset.stable_hash()
 
 
+def test_error_probe_fails_the_run():
+    # An unknown identity is a fail-closed ERROR; it must fail the run, not pass.
+    matrix, corpus = _setup()
+    adapter = FakeAdapter()
+    probeset = ProbeSet("seed", (Probe("P-err", "ghost", ProbeClass.RETRIEVAL, query="x"),))
+
+    result = run(probeset, adapter, matrix, corpus)
+
+    assert result.passed is False
+    assert result.total_errors == 1
+    assert result.total_leaks == 0
+
+
+class _RetrieveOnly:
+    def retrieve(self, query, identity):
+        return []
+
+
+def test_total_skipped_counts_skipped_probes():
+    # A direct_fetch probe against an adapter without fetch_resource is SKIPPED;
+    # the count must be visible so skipped coverage is not mistaken for clean.
+    matrix, corpus = _setup()
+    probeset = ProbeSet("s", (Probe("P", "alice", ProbeClass.DIRECT_FETCH, resource_ref="x"),))
+    result = run(probeset, _RetrieveOnly(), matrix, corpus)
+    assert result.total_skipped == 1
+
+
+def test_all_skipped_run_does_not_pass():
+    # Every probe skipped -> nothing was actually audited -> not a pass.
+    matrix, corpus = _setup()
+    probeset = ProbeSet(
+        "s",
+        (
+            Probe("P1", "alice", ProbeClass.DIRECT_FETCH, resource_ref="x"),
+            Probe("P2", "alice", ProbeClass.ENUMERATION),
+        ),
+    )
+    result = run(probeset, _RetrieveOnly(), matrix, corpus)
+    assert result.total_skipped == 2
+    assert result.passed is False
+
+
+def test_empty_probeset_does_not_pass():
+    # A vacuous run (zero probes) proves nothing; it must not be reported PASS.
+    matrix, corpus = _setup()
+    result = run(ProbeSet("empty", ()), FakeAdapter(), matrix, corpus)
+    assert result.passed is False
+
+
 def test_clean_run_passes():
     matrix, corpus = _setup()
     adapter = FakeAdapter(retrievals={("alice", "policy"): ["c-fin"]})

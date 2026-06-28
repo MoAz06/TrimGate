@@ -35,6 +35,21 @@ class AdapterError(Exception):
     """Genuine backend failure (timeout, auth error). Recorded fail-closed."""
 
 
+def validate_adapter(adapter: object) -> RagAdapter:
+    """Fail loudly if the object cannot serve as an adapter.
+
+    runtime_checkable Protocols only check attribute presence, so a `retrieve`
+    that is a string or has the wrong arity would pass isinstance and surface
+    later as an opaque error. This checks the seam explicitly at resolve time.
+    """
+    retrieve = getattr(adapter, "retrieve", None)
+    if not callable(retrieve):
+        raise TypeError(
+            f"adapter {type(adapter).__name__!r} has no callable retrieve(query, identity)"
+        )
+    return cast("RagAdapter", adapter)
+
+
 def resolve_adapter(spec: str) -> RagAdapter:
     """Resolve a MODULE:ATTR import path to an adapter instance.
 
@@ -45,4 +60,4 @@ def resolve_adapter(spec: str) -> RagAdapter:
     if not sep or not attr:
         raise ValueError(f"adapter must be MODULE:ATTR, got {spec!r}")
     obj = getattr(importlib.import_module(module_name), attr)
-    return cast("RagAdapter", obj() if callable(obj) else obj)
+    return validate_adapter(obj() if callable(obj) else obj)

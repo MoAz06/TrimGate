@@ -18,7 +18,9 @@ def _run(adapter):
 
 
 def _receipt(adapter):
-    return build_receipt(_run(adapter), matrix_path=MATRIX, corpus_path=CORPUS)
+    return build_receipt(
+        _run(adapter), matrix_path=MATRIX, corpus_path=CORPUS, adapter="trimgate.demo:adapter"
+    )
 
 
 def test_receipt_structure_for_leaky_run():
@@ -52,6 +54,22 @@ def test_canonical_json_is_byte_stable_and_excludes_timestamp():
     assert "timestamp" not in first
     # canonical: sorted keys, no insignificant whitespace
     assert first.startswith('{"inputs":')
+
+
+def test_canonical_json_rejects_non_finite_floats():
+    import pytest
+
+    with pytest.raises(ValueError):
+        canonical_json({"x": float("inf")})
+
+
+def test_canonical_json_rejects_floats():
+    import pytest
+
+    # Floats serialize non-portably (diverge from RFC 8785); the payload is
+    # integers + strings only, so any float is a bug.
+    with pytest.raises(ValueError):
+        canonical_json({"x": 1.5})
 
 
 def test_markdown_report_names_the_leak():

@@ -1,5 +1,19 @@
-from trimgate.adapter import RagAdapter
+import pytest
+
+from trimgate.adapter import RagAdapter, validate_adapter
 from trimgate.fake import FakeAdapter
+
+
+def test_validate_adapter_rejects_non_callable_retrieve():
+    class Bogus:
+        retrieve = "not a method"
+
+    with pytest.raises(TypeError):
+        validate_adapter(Bogus())
+
+
+def test_validate_adapter_accepts_a_real_adapter():
+    assert validate_adapter(FakeAdapter()) is not None
 
 
 def test_fake_adapter_retrieve_returns_seeded_chunk_ids():

@@ -27,6 +27,10 @@ _ADAPTERS = {"clean": clean_adapter, "leaky": leaky_adapter}
 @pytest.mark.parametrize("name", ["clean", "leaky"])
 def test_receipt_matches_golden(name):
     result = run(load_probeset(PROBES), _ADAPTERS[name](), load_matrix(MATRIX), load_corpus(CORPUS))
-    produced = canonical_json(build_receipt(result, matrix_path=MATRIX, corpus_path=CORPUS))
+    produced = canonical_json(
+        build_receipt(
+            result, matrix_path=MATRIX, corpus_path=CORPUS, adapter=f"trimgate.demo:{name}_adapter"
+        )
+    )
     golden = (GOLDEN / f"receipt_{name}.json").read_text(encoding="utf-8").rstrip("\n")
     assert produced == golden

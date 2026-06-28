@@ -19,6 +19,10 @@ class UnknownIdentityError(KeyError):
     """
 
 
+class MatrixError(ValueError):
+    """The access-matrix is malformed (fail-closed at load, never silent)."""
+
+
 @dataclass(frozen=True)
 class AccessMatrix:
     identities: dict[str, list[str]]
@@ -33,14 +37,31 @@ class AccessMatrix:
         return frozenset(labels)
 
 
+def _string_list(value: object, where: str) -> list[str]:
+    # A YAML scalar (e.g. `groups: finance`) must NOT be accepted: list("finance")
+    # would shred it into characters and silently corrupt the policy.
+    if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+        raise MatrixError(f"{where} must be a list of strings, got {value!r}")
+    return list(value)
+
+
 def load_matrix(path: str) -> AccessMatrix:
     with open(path, encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
-    identities = {
-        identity: list((spec or {}).get("groups", []))
-        for identity, spec in (data.get("identities") or {}).items()
-    }
+
     label_grants = {
-        group: list(labels) for group, labels in (data.get("label_grants") or {}).items()
+        group: _string_list(labels, f"label_grants[{group!r}]")
+        for group, labels in (data.get("label_grants") or {}).items()
     }
+    identities: dict[str, list[str]] = {}
+    for identity, spec in (data.get("identities") or {}).items():
+        groups = _string_list((spec or {}).get("groups", []), f"identities[{identity!r}].groups")
+        dangling = [g for g in groups if g not in label_grants]
+        if dangling:
+            raise MatrixError(
+                f"identity {identity!r} references undefined group(s) {dangling} "
+                f"(not in label_grants)"
+            )
+        identities[identity] = groups
+
     return AccessMatrix(identities=identities, label_grants=label_grants)

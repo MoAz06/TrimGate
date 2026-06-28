@@ -1,5 +1,12 @@
-from trimgate.corpus import Chunk, Corpus
+import pytest
+
+from trimgate.corpus import Chunk, Corpus, CorpusError
 from trimgate.matrix import AccessMatrix
+
+
+def test_corpus_rejects_duplicate_chunk_id():
+    with pytest.raises(CorpusError):
+        Corpus(chunks=(Chunk("c1", "fin-secret"), Chunk("c1", "hr-public")))
 
 
 def test_authorized_for_returns_chunks_whose_label_is_granted():

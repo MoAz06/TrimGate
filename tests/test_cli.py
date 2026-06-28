@@ -46,6 +46,71 @@ def test_cli_diff_is_empty_and_passes_on_clean_adapter(capsys):
     assert code == 0
 
 
+def test_cli_diff_does_not_claim_clean_on_an_errored_audit(tmp_path, capsys):
+    probes = tmp_path / "ghost.yaml"
+    probes.write_text(
+        'probes:\n  - {id: P, identity: ghost, probe_class: retrieval, query: "x"}\n',
+        encoding="utf-8",
+    )
+    code = main(
+        [
+            "diff",
+            "--adapter",
+            "trimgate.demo:clean_adapter",
+            "--matrix",
+            str(QS / "access-matrix.yaml"),
+            "--corpus",
+            str(QS / "corpus.labeled.jsonl"),
+            "--probes",
+            str(probes),
+        ]
+    )
+    assert code == 2
+    assert "none" not in capsys.readouterr().out
+
+
+def test_cli_run_rejects_empty_probeset(tmp_path, capsys):
+    probes = tmp_path / "empty.yaml"
+    probes.write_text("probes: []\n", encoding="utf-8")
+    code = main(
+        [
+            "run",
+            "--adapter",
+            "trimgate.demo:clean_adapter",
+            "--matrix",
+            str(QS / "access-matrix.yaml"),
+            "--corpus",
+            str(QS / "corpus.labeled.jsonl"),
+            "--probes",
+            str(probes),
+        ]
+    )
+    assert code == 2
+
+
+def test_cli_run_exits_2_on_fail_closed_error(tmp_path, capsys):
+    # A probe for an identity absent from the matrix is a config ERROR -> exit 2.
+    probes = tmp_path / "ghost.yaml"
+    probes.write_text(
+        'probes:\n  - {id: P-err, identity: ghost, probe_class: retrieval, query: "x"}\n',
+        encoding="utf-8",
+    )
+    code = main(
+        [
+            "run",
+            "--adapter",
+            "trimgate.demo:clean_adapter",
+            "--matrix",
+            str(QS / "access-matrix.yaml"),
+            "--corpus",
+            str(QS / "corpus.labeled.jsonl"),
+            "--probes",
+            str(probes),
+        ]
+    )
+    assert code == 2
+
+
 def test_cli_run_out_writes_canonical_receipt_and_markdown(tmp_path, capsys):
     out = tmp_path / "receipt.json"
     md = tmp_path / "receipt.md"
