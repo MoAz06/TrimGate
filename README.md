@@ -2,11 +2,10 @@
 
 > the access-control unit test for enterprise RAG
 
-[![CI](https://github.com/<owner>/trimgate/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/trimgate/actions/workflows/ci.yml)
+[![CI](https://github.com/MoAz06/trimgate/actions/workflows/ci.yml/badge.svg)](https://github.com/MoAz06/trimgate/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/code-Apache--2.0-blue.svg)](LICENSE)
 [![Corpus](https://img.shields.io/badge/corpus-CC--BY--4.0-green.svg)](LICENSES/CC-BY-4.0.txt)
 
-<!-- Replace <owner> with your GitHub username/org once the repo is pushed. -->
 
 TrimGate is a deterministic, test-time auditor for Retrieval-Augmented Generation
 pipelines. For each test identity and probe it checks
