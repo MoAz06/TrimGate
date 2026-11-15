@@ -1,0 +1,6 @@
+# Receipts hash the bytes of the input files, so a CRLF checkout on Windows
+# yields different corpus_sha256 and matrix_sha256 values than the goldens,
+# which are produced on Linux. Pin text files to LF so that a checkout is
+# byte-identical on every platform and a receipt means the same thing
+# wherever it was generated.
+* text=auto eol=lf
