@@ -116,7 +116,7 @@ from trimgate.adapters.azure import AzureSearchAdapter, make_search_client
 
 adapter = AzureSearchAdapter(
     make_search_client(endpoint="https://<svc>.search.windows.net", index_name="<index>"),
-    group_resolver=resolve_entra_groups,   # identity id -> [group object ids]
+    group_resolver=resolve_entra_groups,  # identity id -> [group object ids]
 )
 ```
 
